@@ -393,6 +393,14 @@ function reward(numg0_unnorm,unc)
     return reward_unnorm(numg0_unnorm,unc)/stdstd
 end
 
+function denormalize_numg0(normalized_val)
+    return log(normalized_val) / 10
+end
+
+function denormalize_reward(normalized_reward, stdstd)
+    return normalized_reward * stdstd
+end
+
 
 reward(0.5, unc)
 
