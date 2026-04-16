@@ -501,3 +501,11 @@ function experession_and_growth(unc,numg0_val)
     _,max_growth = solve_prob(parameters, [0], unc)
     return y_end[16] / 1000.0, growth/max_growth
 end
+
+function denormalize_expression(x)
+    return x * 1000
+end
+
+function denormalize_action(x)
+    return exp(10*x)
+end

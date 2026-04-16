@@ -92,6 +92,10 @@ function observation_normalized(params)
     return (observation(params) .- m_obs) ./ std_obs
 end
 
+function observation_denormalized(obs_norm)
+    return obs_norm .* std_obs .+ m_obs
+end
+
 function observation_freq_normalized(params)
     return (observation_freq(params) - m_freq) / std_freq
 end
