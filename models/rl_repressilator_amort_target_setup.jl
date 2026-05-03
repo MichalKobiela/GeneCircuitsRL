@@ -38,10 +38,8 @@ prams_array_1 = [
 Random.seed!(123) 
 signal = simulate_p1_trajectory(prams_array_1)
 
-# Plot
 plot(signal, xlabel="Time", ylabel="Protein p₁", lw=2, title="Repressilator p₁ trajectory")
 
-# Optional: show ACF and second peak value
 acf_vals = autocorrelation(signal)
 
 

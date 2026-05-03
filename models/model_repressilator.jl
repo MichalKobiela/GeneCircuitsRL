@@ -2,11 +2,9 @@ using Catalyst, JumpProcesses, ModelingToolkit, Plots, DifferentialEquations
 using StatsBase
 using Random
 
-# Define species and parameters
 @variables t m₁(t) m₂(t) m₃(t) p₁(t) p₂(t) p₃(t)
 @parameters km kX γm γX K H ϵ  # Transcription, translation, degradation, Hill, leakage
 
-# Define repressilator reaction network with leakage
 repressilator = @reaction_network begin
     # Transcription with Hill repression and leakage
     (km * (ϵ + (1 - ϵ) * (1 / (1 + (p₃ / K)^H)))), ∅ → m₁
@@ -33,7 +31,7 @@ u0 = [
     p₁ => 0.0, p₂ => 0.0, p₃ => 0.0
 ]
 
-# Simulation time
+
 tspan = (0.0, 50.0)
 
 pmap = [
@@ -42,12 +40,10 @@ pmap = [
     kX => 100.0,
     km => 113.4372,
     ϵ  => 0.15,
-    γX => 1.0,       # fixed in the paper
+    γX => 1.0,      
     K  => 199.8989,
 ]
 
-
-# Define base model once
 param_array = [
     7.0,       # H
     17.6822,   # γm
@@ -59,19 +55,17 @@ param_array = [
 ]
 
 
-Random.seed!(123)  # For reproducibility
+Random.seed!(123) 
 jump_inputs = JumpInputs(repressilator, u0, tspan, pmap)
 jump_prob = JumpProblem(jump_inputs, Direct(), save_positions=(false, false))
 sol = solve(jump_prob, saveat=0.5)
 plot(sol[p₁])
 
-# Ensure that remake works correctly
-Random.seed!(123)  #
+Random.seed!(123)  
 prob = remake(jump_prob; p=param_array)
 sol = solve(prob, saveat=0.5)
 plot!(sol[p₁, :])
 
-# Simulation wrapper: defines parameters, runs SSA, returns p₁ time series
 function simulate_p1_trajectory(params::Vector{Float64})
     prob = remake(jump_prob; p=params)
     sol = solve(prob, saveat=0.25)[50:end]

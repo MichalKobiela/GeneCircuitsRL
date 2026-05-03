@@ -31,10 +31,8 @@ end
 Random.seed!(123) 
 signal = simulate_p1_trajectory(param_array)
 
-# Plot
 plot!(signal, xlabel="Time", ylabel="Protein p₁", lw=2, title="Repressilator p₁ trajectory")
 
-# Optional: show ACF and second peak value
 acf_vals = autocorrelation(signal)
 
 Random.seed!(123) 
@@ -128,9 +126,9 @@ function reward_repeated(normalized_params)
 end
 
 
-Random.seed!(123)  # For reproducibility
+Random.seed!(123) 
 setup_loss_val = reward(normalize_params(params_paper)) 
-Random.seed!(123)  # For reproducibility
+Random.seed!(123) 
 loss_val = loss(vcat(params_paper[1:3], LEAKAGE, params_paper[4], GAMMA_X, params_paper[5]))
 @assert setup_loss_val == -loss_val
 @assert denormalize_params(normalize_params(params_paper)) == params_paper
@@ -138,7 +136,7 @@ loss_val = loss(vcat(params_paper[1:3], LEAKAGE, params_paper[4], GAMMA_X, param
 function evaluate_params(params)
     res= []
     for i in 1:1000
-        Random.seed!(i)  # For reproducibility
+        Random.seed!(i) 
         push!(res, reward(params))
     end
     return res

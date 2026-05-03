@@ -71,7 +71,7 @@ function fix_seed(n)
     Random.seed!(n)
 end
 
-# Random sampling test
+# Random sampling
 maxs, freqs, rewards = [], [], []
 Random.seed!(123)
 for i in 1:500

@@ -3,7 +3,6 @@ using Random
 using Plots
 using ProgressBars
 
-# Native parameters
 thetar = 426.8693338968694
 k_cm = 0.005990373118888
 nr = 7549.0
@@ -26,7 +25,6 @@ aatot = 1.0e8
 ns = 0.5
 thetax = 4.379733394834643
 
-# Define rate constants
 b = 0
 dm = 0.1
 kb = 1
@@ -34,7 +32,6 @@ ku = 1.0
 f = cl * k_cm
 rates = [b, dm, kb, ku, f]
 
-# Define initial conditions
 rmr_0 = 0
 em_0 = 0
 rmp_0 = 0
@@ -60,10 +57,8 @@ r_0 = 10.0
 a_0 = 1000.0
 init = [rmr_0, em_0, rmp_0, rmq_0, rmt_0, et_0, rmm_0, zmm_0, zmr_0, zmp_0, zmq_0, zmt_0, mt_0, mm_0, q_0, p_0, si_0, mq_0, mp_0, mr_0, r_0, a_0]
 
-# Define parameters
 parameters = [thetar, k_cm, nr, gmax, cl, nume0, s0, vm, Km, numr0, nx, kq, Kp, vt, nump0, numq0, Kt, nq, aatot, ns, thetax]
 
-# Define the differential equations as a function
 function ribonew_mc2_odes!(dy, y, p, t)
     y = max.(y, 0)
     rates = p[1:5]
@@ -109,12 +104,9 @@ function ribonew_mc2_odes!(dy, y, p, t)
     dy[22] = ns * nucat - ttrate - lam * a
 end
 
-# Define the time span and initial conditions
 t0 = 0.0
-tf = 1e7  # Final time for simulation
+tf = 1e7
 tspan = (t0, tf)
-
-# Define solver options (adjust if necessary)
 t = [t0, tf]
 prob = ODEProblem(ribonew_mc2_odes!, init, tspan, [rates; parameters])
 sol = solve(prob, Rosenbrock23())
@@ -128,7 +120,6 @@ end
 
 @time solve_warmup([rates; parameters])
 @assert solve_warmup([rates; parameters])== sol[:,end]
-# Access the solution
 y = sol
 
 rmr = y[1, :]
@@ -153,17 +144,6 @@ mp = y[19, :]
 mr = y[20, :]
 r = y[21, :]
 a = y[22, :]
-
-
-
-
-
-
-
-
-
-
-# Extracting the last elements of arrays for initial conditions
 rmr_0 = rmr[end]
 em_0 = em[end]
 rmp_0 = rmp[end]
@@ -186,28 +166,18 @@ mp_0 = mp[end]
 mr_0 = mr[end]
 r_0 = r[end]
 a_0 = a[end]
-
-# Randomize initial conditions for the GFP species
 meanGFP = em[end]
 meanmGFP = mm[end]
 meanrmGFP = rmm[end]
 
-Random.seed!(123)  # For reproducibility
+Random.seed!(123) 
 mg_0 = meanmGFP + 0.3 * meanmGFP * randn()
 rmg_0 = meanrmGFP + 0.3 * meanrmGFP * randn()
 g_0 = meanGFP + 0.3 * meanGFP * randn()
-
-
-
-
-# Define the initial conditions array
 init_2 = [rmr_0, em_0, rmp_0, rmq_0, rmt_0, rmg_0, et_0, rmm_0, zmm_0, zmr_0, zmp_0, zmq_0, zmt_0, mt_0, mg_0, g_0, mm_0, q_0, p_0, si_0, mq_0, mp_0, mr_0, r_0, a_0]
 
 function compute_init_2(parameters, rates, seed=nothing)
-    # Perform warm-up computation (replace with actual warm-up logic)
-    y = solve_warmup([rates; parameters])  # Call the warm-up function with the extracted parameters
-
-    # Extract only the necessary values from the warm-up result
+    y = solve_warmup([rates; parameters]) 
     em = y[2, :]
     mm = y[14, :]
     rmm = y[7, :]
@@ -215,8 +185,6 @@ function compute_init_2(parameters, rates, seed=nothing)
     meanGFP = em[end]
     meanmGFP = mm[end]
     meanrmGFP = rmm[end]
-
-     # Randomize initial conditions for the GFP species
     if seed !== nothing
         Random.seed!(seed)  # Set the random seed for reproducibility
     end
@@ -231,11 +199,7 @@ function compute_init_2(parameters, rates, seed=nothing)
 end
 
 @assert compute_init_2(parameters, rates, 123) == init_2
-
-# INDUCTION PARAMETER
 numg0 = 25
-
-# Redefine the parameter vector for the GFP model
 parameters_2 = [cl, nume0, vm, vt, aatot, s0, nx, numq0, nq, nr, ns, thetar, k_cm, gmax, thetax, Km, Kp, Kt, numg0, kq, numr0, nump0]
 # Define rate constants
 b = 0
@@ -249,20 +213,14 @@ dmg = log(2) / 2
 dg = log(2) / 4
 rates_2 = [b, dm, kb, ku, f, dmg, dg, kb_g,ku_g]
 
-# Define the ODE system as a function
 function ribonew_mc2_gfp_odes!(dydt, y, p, t)
     y = max.(y, 0)
-    # Extract rate constants and parameters
     rates = p[1:9]    # First 7 are the rates
     parameters = p[10:end]  # Rest are the parameters
 
     b, dm, kb, ku, f, dmg, dg, kb_g, ku_g = rates
     cl, nume0, vm, vt, aatot, s0, nx, numq0, nq, nr, ns, thetar, k_cm, gmax, thetax, Km, Kp, Kt, numg0, kq, numr0, nump0 = parameters
-
-    # Extract variables from y
     rmr, em, rmp, rmq, rmt, rmg, et, rmm, zmm, zmr, zmp, zmq, zmt, mt, mg, g, mm, q, p, si, mq, mp, mr, r, a = y
-
-    # Intermediate variables
     Kg = gmax / Kp
     gamma = gmax * a / (Kg + a)
     ttrate = (rmq + rmr + rmp + rmt + rmm + rmg) * gamma
@@ -270,9 +228,6 @@ function ribonew_mc2_gfp_odes!(dydt, y, p, t)
     fr = nr * (r + rmr + rmp + rmt + rmm + rmq + rmg + zmr + zmp + zmt + zmm + zmq) /
          (nr * (r + rmr + rmp + rmt + rmm + rmq + rmg + zmr + zmp + zmt + zmm + zmq) + nx * (p + q + et + em + g))
     nucat = em * vm * si / (Km + si)
-    # print("lambda: ",lam)
-
-    # Define the system of ODEs
     dydt[1] = +kb * r * mr + b * zmr - ku * rmr - gamma / nr * rmr - f * rmr - lam * rmr # rmr
     dydt[2] = +gamma / nx * rmm - lam * em # em
     dydt[3] = +kb * r * mp + b * zmp - ku * rmp - gamma / nx * rmp - f * rmp - lam * rmp # rmp
@@ -300,16 +255,11 @@ function ribonew_mc2_gfp_odes!(dydt, y, p, t)
     dydt[25] = +ns * nucat - ttrate - lam * a # a
 end
 
-# Define the time span
 t0 = 0.0
 tf = 1e7  # Final time for simulation
 tspan = (t0, tf)
 
-
-# Define the ODE problem
 prob_2 = ODEProblem(ribonew_mc2_gfp_odes!, init_2, tspan, [rates_2; parameters_2])
-
-# Solve using the Rosenbrock method
 sol = solve(prob_2, Rosenbrock23())
 
 function compute_lam(y, p)
@@ -336,23 +286,15 @@ function solve_prob(parameters, design, unc_params ,seed = nothing)
 
     parameters[20] = ns
 
-    # Define rate constants
     b = 0
     dm = 0.1
     kb = 1
     ku = 1
     f = cl * k_cm
     rates = [b, dm, kb, ku, f]
-
-
-    #compute init
     init_2 = compute_init_2(parameters, rates, seed)
 
-    
-    # Redefine the parameter vector for the GFP model
     parameters_2 = [cl, nume0, vm, vt, aatot, s0, nx, numq0, nq, nr, ns, thetar, k_cm, gmax, thetax, Km, Kp, Kt, numg0, kq, numr0, nump0]
-
-    # Define rate constants
     b = 0
     dm = 0.1
     kb = 1
@@ -377,10 +319,8 @@ function maxgrowth(parameters, unc_params ,seed = nothing)
 end
 
 
-
+#Data for regressor
 using Random, DataFrames
-
-# --- Settings ---
 numg0_values = exp.(collect(0:.01:10))   # grid of inductions
 N_unc = 1000                              # number of uncertainty samples
 thresholds = 0.3:0.05:0.9                 # growth thresholds to consider
@@ -392,7 +332,7 @@ unc_samples = [rand(3) for _ in 1:N_unc]
 # Prepare storage for dataset
 dataset = DataFrame(unc1=Float64[], unc2=Float64[], unc3=Float64[], threshold=Float64[], optimal_numg0=Float64[])
 
-# --- Generate dataset ---
+# Generate dataset
 @time for unc in tqdm(unc_samples)
     # Compute max growth for normalization (almost zero induction)
     _, max_growth = solve_prob(parameters, [0], unc)
@@ -420,9 +360,7 @@ dataset = DataFrame(unc1=Float64[], unc2=Float64[], unc3=Float64[], threshold=Fl
         
         push!(dataset, (unc[1], unc[2], unc[3], th, optimal_numg0))
     end
-end # time
-
-
+end 
 
 println("Dataset ready! Number of samples: ", nrow(dataset))
 first(dataset, 10)  # preview first 10 rows
