@@ -1,4 +1,4 @@
-Code for Sequential Design of Genetic Circuits Under Uncertainty with Reinforcement Learning
+Code for Sequential Design of Genetic Circuits Under Uncertainty with Reinforcement Learning (https://arxiv.org/pdf/2605.06552)
 Michal Kobiela, Diego A. Oyarzun, Michael U. Gutmann
 CC-BY license
 
